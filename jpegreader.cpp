@@ -1,6 +1,13 @@
 #include "jpegreader.h"
 
-#include "jpegreaderimplementation.h"
+#include "jpegreaderimplementationreadutils.h"
+#include "jpegreaderimplementationwriteutils.h"
+
+//TEMP
+#include <QDebug>
+
+using namespace JpegReader::Implementation::ReadUtils;
+using namespace JpegReader::Implementation::WriteUtils;
 
 QImage JpegReader::read(const QString &filePath, bool &hasError, QString &errorMessage)
 {

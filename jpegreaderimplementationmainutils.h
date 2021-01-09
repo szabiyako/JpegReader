@@ -1,11 +1,14 @@
 #ifndef JPEGREADERIMPLEMENTATIONMAINUTILS_H
 #define JPEGREADERIMPLEMENTATIONMAINUTILS_H
 
+#include <vector>
+
 namespace JpegReader {
 namespace Implementation {
 namespace MainUtils {
 
 typedef unsigned char byte;
+
 enum DataHeaderType : byte
 {
     NOT_A_DATA_HEADER,
@@ -25,30 +28,40 @@ struct bytePair
 private:
     byte data[2];
 public:
-    bytePair(byte first = 0, byte second = 0)
+    bytePair(byte first = 0, byte second = 0);
+    bytePair(byte *data);
+    byte &operator[](const int index);
+    byte operator[](const int index) const;
+    unsigned int getSizeBigEndian();
+};
+
+struct BinaryTree
+{
+    struct Node
     {
-        data[0] = first;
-        data[1] = second;
-    }
-    bytePair(byte *data)
-    {
-        this->data[0] = data[0];
-        this->data[1] = data[1];
-    }
-    byte &operator[](const int index)
-    {
-        return data[index];
-    }
-    byte operator[](const int index) const
-    {
-        return data[index];
-    }
-    unsigned int getSizeBigEndian()
-    {
-        unsigned int size = data[1];
-        size += data[0]*256;
-        return size;
-    }
+        bool isLeaf = false;
+        byte value = 0x00;
+        Node *left = nullptr;
+        Node *right = nullptr;
+        ~Node();
+    };
+    Node *root = nullptr;
+    BinaryTree();
+    ~BinaryTree();
+};
+
+
+struct JpegData
+{
+    std::vector<byte> appHeader;
+    std::vector<std::vector<byte>> comments;
+    std::vector<std::vector<byte>> quantizationTables;
+    std::vector<byte> frame;
+    std::vector<std::vector<byte>> huffmanTables;
+    std::vector<byte> scan;
+    std::vector<byte> imageData;
+
+    bool hasAllParts();
 };
 
 }

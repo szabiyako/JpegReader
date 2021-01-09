@@ -1,18 +1,14 @@
-#include "jpegreaderimplementation.h"
+#include "jpegreaderimplementationreadutils.h"
 #include "jpegreaderimplementationmainutils.h"
-
-#include <fstream>
-#include <map>
-#include <vector>
-#include <queue>
 
 using namespace JpegReader::Implementation;
 using namespace JpegReader::Implementation::MainUtils;
+using namespace JpegReader::Implementation::ReadUtils;
 
 //TEMP
 #include <QDebug>
 
-DataHeaderType JpegReader::Implementation::getHeaderType(const bytePair &bytes)
+DataHeaderType JpegReader::Implementation::ReadUtils::getHeaderType(const bytePair &bytes)
 {
     if (bytes[0] != 0xFF)
         return DataHeaderType::NOT_A_DATA_HEADER;
@@ -30,55 +26,7 @@ DataHeaderType JpegReader::Implementation::getHeaderType(const bytePair &bytes)
     return DataHeaderType::NOT_A_DATA_HEADER;
 }
 
-struct BinaryTree
-{
-    struct Node
-    {
-        bool isLeaf = false;
-        byte value = 0x00;
-        Node *left = nullptr;
-        Node *right = nullptr;
-        ~Node()
-        {
-            if (left != nullptr)
-                delete left;
-            if (right != nullptr)
-                delete right;
-        }
-    };
-    Node *root = nullptr;
-    BinaryTree()
-    {
-        root = new Node;
-    }
-    ~BinaryTree()
-    {
-        delete root;
-    }
-};
-
-
-struct JpegData
-{
-    std::vector<byte> appHeader;
-    std::vector<std::vector<byte>> comments;
-    std::vector<std::vector<byte>> quantizationTables;
-    std::vector<byte> frame;
-    std::vector<std::vector<byte>> huffmanTables;
-    std::vector<byte> scan;
-    std::vector<byte> imageData;
-
-    bool hasAllParts()
-    {
-        return !appHeader.empty() &&
-               !quantizationTables.empty() &&
-               !frame.empty() &&
-               !huffmanTables.empty() &&
-               !scan.empty();
-    }
-};
-
-void loadData(JpegData &jpgData, std::ifstream &input, DataHeaderType dataTypeToLoad)
+void JpegReader::Implementation::ReadUtils::loadData(JpegData &jpgData, std::ifstream &input, DataHeaderType dataTypeToLoad)
 {
     bytePair inputSizeOfData;
     input.read((char*)&inputSizeOfData, sizeof(bytePair));
@@ -115,7 +63,7 @@ void loadData(JpegData &jpgData, std::ifstream &input, DataHeaderType dataTypeTo
     return;
 }
 
-void stepBuildTree(std::queue<BinaryTree::Node*> &nodes,
+void JpegReader::Implementation::ReadUtils::stepBuildTree(std::queue<BinaryTree::Node*> &nodes,
                    std::queue<byte> &layersCount,
                    std::queue<byte> &values)
 {
@@ -139,7 +87,7 @@ void stepBuildTree(std::queue<BinaryTree::Node*> &nodes,
     }
 }
 
-void recursiveFillMap(std::map<std::string, byte> &map, const std::string &code, BinaryTree::Node* currentNode)
+void JpegReader::Implementation::ReadUtils::recursiveFillMap(std::map<std::string, byte> &map, const std::string &code, BinaryTree::Node* currentNode)
 {
     if (currentNode == nullptr)
         return;
@@ -154,7 +102,7 @@ void recursiveFillMap(std::map<std::string, byte> &map, const std::string &code,
     recursiveFillMap(map, code + "1", currentNode->right);
 }
 
-std::map<std::string, byte> generateMap(const BinaryTree &tree)
+std::map<std::string, byte> JpegReader::Implementation::ReadUtils::generateMap(const BinaryTree &tree)
 {
     std::map<std::string, byte> map;
     recursiveFillMap(map, "0", tree.root->left);
@@ -162,7 +110,7 @@ std::map<std::string, byte> generateMap(const BinaryTree &tree)
     return map;
 }
 
-std::map<std::string, byte> getHuffmanMap(const std::vector<byte> &data)
+std::map<std::string, byte> JpegReader::Implementation::ReadUtils::getHuffmanMap(const std::vector<byte> &data)
 {
     //Read bytes count for every layer
     std::queue<byte> queuelayerCount;
@@ -188,7 +136,7 @@ std::map<std::string, byte> getHuffmanMap(const std::vector<byte> &data)
     return generateMap(tree);
 }
 
-JpegData loadJpegData(const QString &filePath, bool &hasError, QString &errorMessage)
+JpegData JpegReader::Implementation::ReadUtils::loadJpegData(const QString &filePath, bool &hasError, QString &errorMessage)
 {
     std::ifstream input(filePath.toStdWString().c_str(), std::ios::binary);
     if (!input.is_open())

@@ -17,15 +17,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     jpegreader.cpp \
-    jpegreaderimplementation.cpp \
     jpegreaderimplementationmainutils.cpp \
+    jpegreaderimplementationreadutils.cpp \
+    jpegreaderimplementationwriteutils.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     jpegreader.h \
-    jpegreaderimplementation.h \
     jpegreaderimplementationmainutils.h \
+    jpegreaderimplementationreadutils.h \
+    jpegreaderimplementationwriteutils.h \
     mainwindow.h
 
 FORMS += \
