@@ -176,14 +176,14 @@ JpegData JpegReader::Implementation::ReadUtils::loadJpegData(const QString &file
     if (!jpgData.hasAllParts())
     {
         hasError = true;
-        qDebug() << (jpgData.appHeader.size() > 0 ? "" : "appHeader doesn't exist!");
-        qDebug() << (jpgData.comments.size() > 0 ? "" : "comments doesn't exist!");
-        qDebug() << (jpgData.quantizationTables.size() > 0 ? "" : "quantizationTables doesn't exist!");
-        qDebug() << (jpgData.frame.size() > 0 ? "" : "frame doesn't exist!");
-        qDebug() << (jpgData.huffmanTables.size() > 0 ? "" : "huffmanTables doesn't exist!");
-        qDebug() << (jpgData.scan.size() > 0 ? "" : "scan doesn't exist!");
-        qDebug() << (jpgData.imageData.size() > 0 ? "" : "imageData doesn't exist!");
-        errorMessage = "File is corrupted";
+        QString missingParts;
+        missingParts += jpgData.appHeader.size() > 0 ? "" : "\n - appHeader";
+        missingParts += jpgData.quantizationTables.size() > 0 ? "" : "\n - quantizationTables";
+        missingParts += jpgData.frame.size() > 0 ? "" : "\n - frame";
+        missingParts += jpgData.huffmanTables.size() > 0 ? "" : "\n - huffmanTables";
+        missingParts += jpgData.scan.size() > 0 ? "" : "\n - scan";
+        missingParts += jpgData.imageData.size() > 0 ? "" : "\n - imageData";
+        errorMessage = "File is corrupted. Missing parts:" + QString("\n---------------------------------") + missingParts;
     }
     return jpgData;
 }
