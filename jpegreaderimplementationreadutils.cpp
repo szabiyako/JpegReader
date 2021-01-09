@@ -1,9 +1,4 @@
 #include "jpegreaderimplementationreadutils.h"
-#include "jpegreaderimplementationmainutils.h"
-
-using namespace JpegReader::Implementation;
-using namespace JpegReader::Implementation::MainUtils;
-using namespace JpegReader::Implementation::ReadUtils;
 
 //TEMP
 #include <QDebug>
@@ -16,6 +11,7 @@ DataHeaderType JpegReader::Implementation::ReadUtils::getHeaderType(const bytePa
     {
     case 0xD8 : return DataHeaderType::JPEG_START;
     case 0xE0 : return DataHeaderType::APPLICATION_HEADER;
+    case 0xE1 : return DataHeaderType::EXIF_APPLICATION_HEADER;
     case 0xFE : return DataHeaderType::COMMENT_HEADER;
     case 0xDB : return DataHeaderType::QUANTIZATION_TABLE;
     case 0xC0 : return DataHeaderType::START_OF_FRAME;
@@ -156,8 +152,17 @@ JpegData JpegReader::Implementation::ReadUtils::loadJpegData(const QString &file
         {
             if (inputHeader == DataHeaderType::JPEG_START)
                 foundStart = true;
+            else if (inputHeader == DataHeaderType::EXIF_APPLICATION_HEADER)
+            {
+                input.close();
+                hasError = true;
+                errorMessage = "Not support EXIF format (only JFIF)";
+                return jpgData;
+            }
             else
                 loadData(jpgData, input, inputHeader);
+
+            //End reading when we read all jpeg parts
             if (inputHeader == DataHeaderType::START_OF_SCAN)
                 break;
         }
@@ -171,6 +176,13 @@ JpegData JpegReader::Implementation::ReadUtils::loadJpegData(const QString &file
     if (!jpgData.hasAllParts())
     {
         hasError = true;
+        qDebug() << (jpgData.appHeader.size() > 0 ? "" : "appHeader doesn't exist!");
+        qDebug() << (jpgData.comments.size() > 0 ? "" : "comments doesn't exist!");
+        qDebug() << (jpgData.quantizationTables.size() > 0 ? "" : "quantizationTables doesn't exist!");
+        qDebug() << (jpgData.frame.size() > 0 ? "" : "frame doesn't exist!");
+        qDebug() << (jpgData.huffmanTables.size() > 0 ? "" : "huffmanTables doesn't exist!");
+        qDebug() << (jpgData.scan.size() > 0 ? "" : "scan doesn't exist!");
+        qDebug() << (jpgData.imageData.size() > 0 ? "" : "imageData doesn't exist!");
         errorMessage = "File is corrupted";
     }
     return jpgData;

@@ -20,7 +20,9 @@ enum DataHeaderType : byte
     START_OF_FRAME,
     HUFFMAN_TABLE,
     START_OF_SCAN,
-    JPEG_END
+    JPEG_END,
+
+    EXIF_APPLICATION_HEADER
 };
 
 struct bytePair

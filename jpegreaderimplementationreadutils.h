@@ -15,6 +15,7 @@ namespace Implementation {
 namespace ReadUtils {
 
 DataHeaderType getHeaderType(const bytePair &bytes);
+
 void loadData(JpegData &jpgData, std::ifstream &input, DataHeaderType dataTypeToLoad);
 
 void stepBuildTree(std::queue<BinaryTree::Node*> &nodes,
